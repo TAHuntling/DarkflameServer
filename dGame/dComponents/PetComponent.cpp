@@ -213,7 +213,7 @@ void PetComponent::OnUse(Entity* originator) {
 
 		float y = dpWorld::GetNavMesh()->GetHeightAtPoint(attempt);
 
-		while (std::abs(y - petPosition.y) > 2 && interactionDistance > 5) {
+		while (std::abs(y - petPosition.y) > 4 && interactionDistance > 10) {
 			const NiPoint3 forward = m_Parent->GetRotation().GetForwardVector();
 
 			attempt = originatorPosition + forward;
@@ -236,6 +236,7 @@ void PetComponent::OnUse(Entity* originator) {
 
 	NiPoint3 facePlayer = NiQuaternion::LookAt(m_Parent->GetPosition(), petPositionTemp).GetForwardVector();
 	auto rotation = NiQuaternion::LookAt(position, petPosition);
+	m_Parent->SetRotation(NiQuaternion::LookAt(petPositionTemp, position));
 
 	GameMessages::SendNotifyPetTamingMinigame(
 		originator->GetObjectID(),
