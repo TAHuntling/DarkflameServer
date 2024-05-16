@@ -33,6 +33,9 @@
 #include "eMissionState.h"
 #include "dNavMesh.h"
 
+#include <iostream>
+#include <chrono>
+
 std::unordered_map<LWOOBJID, LWOOBJID> PetComponent::currentActivities{};
 std::unordered_map<LWOOBJID, LWOOBJID> PetComponent::activePets{};
 
@@ -201,7 +204,7 @@ void PetComponent::OnUse(Entity* originator) {
 	if (interactionDistance <= 0) {
 		interactionDistance = 15;
 	}
-
+	NiPoint3 attemptTemp;
 	auto position = originatorPosition;
 
 	NiPoint3 forward = NiQuaternion::LookAt(m_Parent->GetPosition(), originator->GetPosition()).GetForwardVector();
@@ -212,7 +215,7 @@ void PetComponent::OnUse(Entity* originator) {
 
 		float y = dpWorld::GetNavMesh()->GetHeightAtPoint(attempt);
 
-		while (std::abs(y - petPosition.y) > 4 && interactionDistance > 10) {
+		while (std::abs(y - petPosition.y) > 1 && interactionDistance > 5) {
 			const NiPoint3 forward = m_Parent->GetRotation().GetForwardVector();
 
 			attempt = originatorPosition + forward * interactionDistance;
@@ -220,13 +223,14 @@ void PetComponent::OnUse(Entity* originator) {
 			y = dpWorld::GetNavMesh()->GetHeightAtPoint(attempt);
 
 			interactionDistance -= 0.5f;
+
 		}
 
 		position = attempt;
 	} else {
 		position = petPosition + forward * interactionDistance;
 	}
-
+	position.y = dpWorld::GetNavMesh()->GetHeightAtPoint(attemptTemp);
 
 	auto rotation = NiQuaternion::LookAt(position, petPosition);
 
