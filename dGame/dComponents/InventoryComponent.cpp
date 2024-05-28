@@ -1,7 +1,7 @@
 #include "InventoryComponent.h"
 
 #include <sstream>
-
+#include <queue>
 #include "Entity.h"
 #include "Item.h"
 #include "Game.h"
@@ -339,13 +339,13 @@ void InventoryComponent::MoveItemToInventory(Item* item, const eInventoryType in
 					break;
 				}
 			}
-
+			LWOOBJID buyBackItem = item->GetId();
 			const auto delta = std::min<uint32_t>(item->GetCount(), left);
-
 			left -= delta;
-
+			if (inventory == VENDOR_BUYBACK) {
+				AddItemToBuyback(buyBackItem, item);
+			}
 			AddItem(lot, delta, eLootSourceType::NONE, inventory, {}, LWOOBJID_EMPTY, showFlyingLot, isModMoveAndEquip, LWOOBJID_EMPTY, origin->GetType(), 0, false, preferredSlot);
-
 			item->SetCount(item->GetCount() - delta, false, false);
 
 			isModMoveAndEquip = false;
@@ -358,9 +358,11 @@ void InventoryComponent::MoveItemToInventory(Item* item, const eInventoryType in
 		}
 
 		const auto delta = std::min<uint32_t>(item->GetCount(), count);
-
+		LWOOBJID buyBackItem = item->GetId();
+		if (inventory == VENDOR_BUYBACK) {
+			AddItemToBuyback(buyBackItem, item);
+		}
 		AddItem(lot, delta, eLootSourceType::NONE, inventory, config, LWOOBJID_EMPTY, showFlyingLot, isModMoveAndEquip, subkey, origin->GetType(), 0, item->GetBound(), preferredSlot);
-
 		item->SetCount(item->GetCount() - delta, false, false);
 	}
 
@@ -1602,4 +1604,35 @@ bool InventoryComponent::SetSkill(BehaviorSlot slot, uint32_t skillId) {
 	GameMessages::SendAddSkill(m_Parent, skillId, slot);
 	m_Skills.insert_or_assign(slot, skillId);
 	return true;
+}
+void InventoryComponent::AddItemToBuyback(LWOOBJID buyBackItem, Item* item) {
+	LWOOBJID test = item->GetId();
+	if (test == buyBackItem) {
+		buybackQueue.push(buyBackItem); // Add item to the end of the queue
+		CheckBuybackInventoryCapacity(item); // Check if capacity exceeded after adding item
+	}
+}
+
+void InventoryComponent::CheckBuybackInventoryCapacity(Item* item) {
+	const uint32_t maxCapacity = 27; // Maximum capacity of vendor buyback inventory
+
+	if (buybackQueue.size() > maxCapacity) {
+		LWOOBJID oldestItem = buybackQueue.front(); // Get the oldest item from the front of the queue
+		LWOOBJID test = item->GetId();
+		if (test == oldestItem) {
+			buybackQueue.pop(); // Remove the oldest item from the queue
+			RemoveItemFromBuyback(oldestItem, item); // Remove the oldest item from the buyback inventory
+		}
+	}
+}
+
+void InventoryComponent::RemoveItemFromBuyback(LWOOBJID buyBackItem, Item* item) {
+	// Check if the item pointer is valid
+	if (!buyBackItem) {
+		return;
+	}
+	// Assuming InventoryComponent has a function to remove items
+	bool removed = RemoveItem(item->GetLot(), item->GetCount());
+
+	return;
 }

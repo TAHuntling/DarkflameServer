@@ -5,7 +5,7 @@
 
 #include <map>
 #include <stack>
-
+#include <queue>
 
 #include "BehaviorSlot.h"
 #include "tinyxml2.h"
@@ -367,7 +367,11 @@ public:
 	 */
 	void UnequipScripts(Item* unequippedItem);
 
-	std::map<BehaviorSlot, uint32_t> GetSkills(){ return m_Skills; };
+	void AddItemToBuyback(LWOOBJID buyBackItem, Item* item);
+	void CheckBuybackInventoryCapacity(Item* item);
+	void RemoveItemFromBuyback(LWOOBJID buyBackItem, Item* item);
+
+	std::map<BehaviorSlot, uint32_t> GetSkills() { return m_Skills; };
 
 	bool SetSkill(int slot, uint32_t skillId);
 	bool SetSkill(BehaviorSlot slot, uint32_t skillId);
@@ -477,6 +481,8 @@ private:
 	 * @param document the xml doc to load from
 	 */
 	void UpdatePetXml(tinyxml2::XMLDocument& document);
+
+	std::queue<LWOOBJID> buybackQueue;
 };
 
 #endif
