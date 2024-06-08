@@ -7,7 +7,7 @@
 #include "Entity.h"
 
 void AgSpiderBossMessage::MakeBox() {
-	if ((boxTarget == nullptr) || !(boxSelf == nullptr) || (isDisp)) {
+	if (!boxTarget || !boxSelf || isDisp) {
 		return;
 	}
 
@@ -30,7 +30,6 @@ void AgSpiderBossMessage::CollisionPhantom(Entity* self, Entity* target) {
 		dir.y = dir.y + 15;
 		dir.x = dir.x * 100;
 		dir.z = dir.z * 100;
-		//Line 40 of LUA
 	}
 
 	if (!target->GetObjectID() || isTouch || isDisp) {

@@ -672,6 +672,7 @@ namespace GameMessages {
 
 	void SendSlashCommandFeedbackText(Entity* entity, std::u16string text);
 	void SendForceCameraTargetCycle(Entity* entity, bool bForceCycling, eCameraTargetCyclingMode cyclingMode, LWOOBJID optionalTargetID);
+	void DisplayToolTip(bool bShow, std::string boxText, float boxTime);
 };
 
 #endif // GAMEMESSAGES_H
